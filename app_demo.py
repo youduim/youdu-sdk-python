@@ -91,8 +91,10 @@ async def receive_msg(req):
     msg = ReceiveMessage().from_json_object(msg_dict)
     print(str(msg))
 
-    if msg.msg_type == MESSAGE_TYPE_IMAGE or msg.msg_type == MESSAGE_TYPE_FILE:
-        client.download_file(msg.msg_body.media_id, OUT_DIR)
+    if msg.msg_type == MESSAGE_TYPE_IMAGE:
+        client.download_file(msg.msg_body.to_image_body().media_id, OUT_DIR)
+    elif msg.msg_type == MESSAGE_TYPE_FILE:
+        client.download_file(msg.msg_body.to_file_body().media_id, OUT_DIR)
     else:
         pass
 

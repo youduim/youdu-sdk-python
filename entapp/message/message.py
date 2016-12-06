@@ -62,6 +62,56 @@ class MessageBody(object):
         """
         raise NotImplemented
 
+    def to_text_body(self):
+        """
+        转换为TextBody
+        :rtype: TextBody
+        """
+        if isinstance(self, TextBody):
+            return self
+
+        return None
+
+    def to_image_body(self):
+        """
+        转换为ImageBody
+        :rtype: ImageBody
+        """
+        if isinstance(self, ImageBody):
+            return self
+
+        return None
+
+    def to_file_body(self):
+        """
+        转换为FileBody
+        :rtype: FileBody
+        """
+        if isinstance(self, FileBody):
+            return self
+
+        return None
+
+    def to_mpnews_body(self):
+        """
+        转换为MpnewsBody
+        :rtype: MpnewsBody
+        """
+        if isinstance(self, MpnewsBody):
+            return self
+
+        return None
+
+    def to_exlink_body(self):
+        """
+        转换为ExlinkBody
+        :rtype: ExlinkBody
+        """
+        if isinstance(self, ExlinkBody):
+            return self
+
+        return None
+
 
 class TextBody(MessageBody):
     """
