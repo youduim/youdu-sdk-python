@@ -1,17 +1,12 @@
 # 有度企业应用API demo
-## 依赖
+## 依赖（请自行使用pip安装）
 - Crypto
 - requests
 - requests_toolbelt
 - struct
-- aiohttp
+- aiohttp（可选，用于回调示例）
 
 ## 实现内容
-- sendmsg.py 客户端接口调用演示
-1. 获取token。
-2. 上传、下载文件和图片。
-3. 发送消息。
-
-- receivemsg.py 服务端回调接口调用演示
-1. 启动服务。
-2. 解析回调内容。
+- 企业应用主动调用接口封装entapp（需求python2或python3）
+- 主动调用接口测试用例（需求python2或python3）
+- 回调接口示例。（需求python3）
