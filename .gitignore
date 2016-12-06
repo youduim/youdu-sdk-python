@@ -1,6 +1,5 @@
-*/.vscode
-*/.idea
-*/.python-version
-*/.DS_Store
-*/*.pyc
-*/__pycache__
+**/.vscode
+**/.idea
+**/.python-version
+**/.DS_Store
+**/__pycache__
