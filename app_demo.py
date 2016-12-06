@@ -2,18 +2,18 @@
 
 """
 回调模式示例，简单企业应用示例
+!!需要用python3运行!!
 """
 
-from aiohttp import web
-import json
 
+from aiohttp import web
 from urllib.parse import parse_qsl
 
 import entapp.client as app
 from entapp.message import *
 from entapp.aes import AESCrypto
 from entapp.aes import generate_signature
-from entapp.utils import pystr, json_loads_utf8
+from entapp.utils import *
 
 
 BUIN = 0  # 请填写企业总计号
@@ -42,34 +42,34 @@ async def receive_msg(req):
     print(req.path)
     query_dict = dict(parse_qsl(req.query_string))
     signature = query_dict.get('msg_signature')
-    if not isinstance(signature, str):
+    if not is_instance(signature, unicode_str(), str):
         print('msg_signature is invalid')
         return
 
     nonce = query_dict.get('nonce')
-    if not isinstance(nonce, str):
+    if not is_instance(nonce, unicode_str(), str):
         print('nonce is invalid')
         return
 
     timestamp = query_dict.get('timestamp')
-    if not isinstance(timestamp, str):
+    if not is_instance(timestamp, unicode_str(), str):
         print('timestamp is invalid')
         return
 
     json_obj = None
     try:
         json_obj = await req.json()
-    except json.JSONDecodeError as e:
+    except ValueError as e:
         print('failed to decode json', e)
         return
 
     encrypt = json_obj.get('encrypt')
-    if not isinstance(encrypt, str):
+    if not is_instance(encrypt, unicode_str(), str):
         print('encrypt content is invalid')
         return
 
     my_signature = generate_signature(TOKEN, timestamp, nonce, encrypt)
-    if signature != my_signature:
+    if pystr(signature) != my_signature:
         print('signature not match')
         return
 
@@ -79,7 +79,7 @@ async def receive_msg(req):
         return
 
     to_app = json_obj.get('toApp')
-    if not isinstance(to_app, str):
+    if not is_instance(to_app, unicode_str(), str):
         print('toApp is invalid')
         return
 

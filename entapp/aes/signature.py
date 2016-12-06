@@ -19,18 +19,18 @@ def generate_signature(token, timestamp, nonce, encrypt):
     :param encrypt: 回调json数据的密文字段
     :return: 安全签名
 
-    :type token: str
-    :type timestamp: str
-    :type nonce: str
-    :type encrypt: str
+    :type token: unicode or str
+    :type timestamp: unicode or str
+    :type nonce: unicode or str
+    :type encrypt: unicode or str
     :rtype: str
     """
-    check_type(token, str)
-    check_type(timestamp, str)
-    check_type(nonce, str)
-    check_type(encrypt, str)
+    check_types(token, unicode_str(), str)
+    check_types(timestamp, unicode_str(), str)
+    check_types(nonce, unicode_str(), str)
+    check_types(encrypt, unicode_str(), str)
 
-    sort_list = [token, timestamp, nonce, encrypt]
+    sort_list = [pystr(token), pystr(timestamp), pystr(nonce), pystr(encrypt)]
     sort_list.sort()
     sha = hashlib.sha1()
     sha.update(bytestr("".join(sort_list)))

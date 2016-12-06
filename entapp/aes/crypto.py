@@ -24,14 +24,14 @@ class AESCrypto(object):
         :param app_id: AppId
         :param key: AES Key
 
-        :type app_id: str
-        :type key: str
+        :type app_id: unicode or str
+        :type key: unicode or str
         """
-        check_type(key, str)
-        check_type(app_id, str)
+        check_types(key, unicode_str(), str)
+        check_types(app_id, unicode_str(), str)
 
-        self.__key = key
-        self.__app_id = app_id
+        self.__key = pystr(key)
+        self.__app_id = pystr(app_id)
 
     @property
     def key(self):
@@ -69,10 +69,10 @@ class AESCrypto(object):
         :return: 明文
         :except AESCryptoError: 解密失败
 
-        :type input_string: str
+        :type input_string: unicode or str
         :rtype: bytes
         """
-        check_type(input_string, str)
+        check_types(input_string, unicode_str(), str)
         return _decrypt(self.__key, self.__app_id, input_string)
 
 
@@ -88,8 +88,8 @@ def _encrypt(key, app_id, input_data):
     :return: 密文
     :except AESCryptoError: 加密失败
 
-    :type key: str
-    :type app_id: str
+    :type key: unicode or str
+    :type app_id: unicode or str
     :type input_data: bytes
     :rtype: str
     """
@@ -118,9 +118,9 @@ def _decrypt(key, app_id, input_string):
     :return: 明文
     :except AESCryptoError: 解密失败
 
-    :type key: str
-    :type app_id: str
-    :type input_string: str
+    :type key: unicode or str
+    :type app_id: unicode or str
+    :type input_string: unicode or str
     :rtype: bytes
     """
     try:

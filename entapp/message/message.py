@@ -27,7 +27,7 @@ class MessageBody(object):
         :return: 初始化过的body
         :except ParamParserError: 解析失败
 
-        :type json_string: str
+        :type json_string: unicode or str
         :rtype: MessageBody
         """
         raise NotImplemented
@@ -73,10 +73,10 @@ class TextBody(MessageBody):
         构造函数
         :param content: 文字内容
 
-        :type content: str
+        :type content: unicode or str
         """
-        check_type(content, str)
-        self.__content = content
+        check_types(content, unicode_str(), str)
+        self.__content = pystr(content)
 
     @property
     def content(self):
@@ -93,16 +93,16 @@ class TextBody(MessageBody):
         return {'content': self.__content}
 
     def from_json_string(self, json_string):
-        check_type(json_string, str)
+        check_types(json_string, unicode_str(), str)
         try:
             return self.from_json_object(json_loads_utf8(json_string))
-        except json.JSONDecodeError as e:
+        except ValueError as e:
             raise ParamParserError('decode json failed', e)
 
     def from_json_object(self, json_object):
         check_type(json_object, dict)
         content = json_object.get('content')
-        if not isinstance(content, str) and not isinstance(content, unicode_str()):
+        if not is_instance(content, unicode_str(), str):
             raise ParamParserError('content not exists or not match type bytes and unicode or str')
 
         self.__content = pystr(content)
@@ -123,10 +123,10 @@ class ImageBody(MessageBody):
         构造函数
         :param media_id: 资源Id
 
-        :type media_id: str
+        :type media_id: unicode or str
         """
-        check_type(media_id, str)
-        self.__media_id = media_id
+        check_types(media_id, unicode_str(), str)
+        self.__media_id = pystr(media_id)
 
     @property
     def media_id(self):
@@ -143,16 +143,16 @@ class ImageBody(MessageBody):
         return {'media_id': self.__media_id}
 
     def from_json_string(self, json_string):
-        check_type(json_string, str)
+        check_types(json_string, unicode_str(), str)
         try:
             return self.from_json_object(json_loads_utf8(json_string))
-        except json.JSONDecodeError as e:
+        except ValueError as e:
             raise ParamParserError('decode json failed', e)
 
     def from_json_object(self, json_object):
         check_type(json_object, dict)
         media_id = json_object.get('media_id')
-        if not isinstance(media_id, str):
+        if not is_instance(media_id, unicode_str(), str):
             raise ParamParserError('media_id not exists or type not match type bytes and unicode or str')
 
         self.__media_id = pystr(media_id)
@@ -173,10 +173,10 @@ class FileBody(MessageBody):
         构造函数
         :param media_id: 资源Id
 
-        :type media_id: str
+        :type media_id: unicode or str
         """
-        check_type(media_id, str)
-        self.__media_id = media_id
+        check_types(media_id, unicode_str(), str)
+        self.__media_id = pystr(media_id)
 
     @property
     def media_id(self):
@@ -193,16 +193,16 @@ class FileBody(MessageBody):
         return {'media_id': self.__media_id}
 
     def from_json_string(self, json_string):
-        check_type(json_string, str)
+        check_types(json_string, unicode_str(), str)
         try:
             return self.from_json_object(json_loads_utf8(json_string))
-        except json.JSONDecodeError as e:
+        except ValueError as e:
             raise ParamParserError('decode json failed', e)
 
     def from_json_object(self, json_object):
         check_type(json_object, dict)
         media_id = json_object.get('media_id')
-        if not isinstance(media_id, str):
+        if not is_instance(media_id, unicode_str(), str):
             raise ParamParserError('media_id not exists or type not match type bytes and unicode or str')
 
         self.__media_id = pystr(media_id)
@@ -261,19 +261,19 @@ class MpnewsBodyCell(MessageBody):
         :param digest: 摘要
         :param content: 正文
 
-        :type title: str
-        :type media_id: str
-        :type digest: str
-        :type content: str
+        :type title: unicode or str
+        :type media_id: unicode or str
+        :type digest: unicode or str
+        :type content: unicode or str
         """
-        check_type(title, str)
-        check_type(media_id, str)
-        check_type(digest, str)
-        check_type(content, str)
-        self.__title = title
-        self.__media_id = media_id
-        self.__digest = digest
-        self.__content = content
+        check_types(title, unicode_str(), str)
+        check_types(media_id, unicode_str(), str)
+        check_types(digest, unicode_str(), str)
+        check_types(content, unicode_str(), str)
+        self.__title = pystr(title)
+        self.__media_id = pystr(media_id)
+        self.__digest = pystr(digest)
+        self.__content = pystr(content)
 
     @property
     def title(self):
@@ -375,19 +375,19 @@ class ExlinkBodyCell(MessageBody):
         :param digest: 摘要
         :param media_id: 封面图片的Id
 
-        :type title: str
-        :type url: str
-        :type digest: str
-        :type media_id: str
+        :type title: unicode or str
+        :type url: unicode or str
+        :type digest: unicode or str
+        :type media_id: unicode or str
         """
-        check_type(title, str)
-        check_type(url, str)
-        check_type(digest, str)
-        check_type(media_id, str)
-        self.__title = title
-        self.__url = url
-        self.__digest = digest
-        self.__media_id = media_id
+        check_types(title, unicode_str(), str)
+        check_types(url, unicode_str(), str)
+        check_types(digest, unicode_str(), str)
+        check_types(media_id, unicode_str(), str)
+        self.__title = pystr(title)
+        self.__url = pystr(url)
+        self.__digest = pystr(digest)
+        self.__media_id = pystr(media_id)
 
     @property
     def title(self):
@@ -452,14 +452,14 @@ class Message(object):
         :param msg_type: 消息类型
         :param msg_body: 消息体
 
-        :type to_user: str
+        :type to_user: unicode or str
         :type msg_type: str
         :type msg_body: MessageBody
         """
-        check_type(to_user, str)
+        check_types(to_user, unicode_str(), str)
         check_type(msg_type, str)
-        check_type(msg_body, MessageBody)
-        self.__to_user = to_user
+        check_types(msg_body, MessageBody)
+        self.__to_user = pystr(to_user)
         self.__msg_type = msg_type
         self.__msg_body = msg_body
 
@@ -490,7 +490,7 @@ class Message(object):
     def to_json_string(self):
         """
         生成json字符串
-        :rtype: unicode or str
+        :rtype: str
         """
         return json.dumps(self.to_json_object())
 
@@ -571,13 +571,13 @@ class ReceiveMessage(object):
         :return: 初始化过对象
         :except ParamParserError: 解析失败
 
-        :type json_string: str
+        :type json_string: unicode or str
         :rtype: ReceiveMessage
         """
-        check_type(json_string, str)
+        check_types(json_string, unicode_str(), str)
         try:
             return self.from_json_object(json_loads_utf8(json_string))
-        except json.JSONDecodeError as e:
+        except ValueError as e:
             raise ParamParserError('decode json failed', e)
 
     def from_json_object(self, json_object):
@@ -592,7 +592,7 @@ class ReceiveMessage(object):
         """
         check_type(json_object, dict)
         from_user = json_object.get('fromUser')
-        if not isinstance(from_user, str) and not isinstance(from_user, unicode_str()):
+        if not is_instance(from_user, unicode_str(), str):
             raise ParamParserError('fromUser not exists or type not match type bytes and unicode or str')
 
         self.__from_user = pystr(from_user)
@@ -604,13 +604,13 @@ class ReceiveMessage(object):
         self.__create_time = create_time
 
         package_id = json_object.get('packageId')
-        if not isinstance(package_id, str):
+        if not is_instance(package_id, unicode_str(), str):
             raise ParamParserError('packageId not exists or type not match type bytes and unicode or str')
 
         self.__package_id = pystr(package_id)
 
         msg_type = json_object.get('msgType')
-        if not isinstance(msg_type, str):
+        if not is_instance(msg_type, unicode_str(), str):
             raise ParamParserError('msgType not exists or type not match type bytes and unicode or str')
 
         self.__msg_type = pystr(msg_type)

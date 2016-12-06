@@ -7,6 +7,10 @@
 from platform import python_version_tuple
 import json
 
+
+PYTHON_VERSION = int(python_version_tuple()[0])
+
+
 def bytestr(text):
     """
     字符串转字节数组，使用utf-8编码
@@ -16,7 +20,7 @@ def bytestr(text):
     :type text: str or unicode or string
     :rtype: bytes
     """
-    if int(python_version_tuple()[0]) < 3:
+    if PYTHON_VERSION < 3:
         if isinstance(text, str):
             return text
         elif isinstance(text, unicode):
@@ -41,7 +45,7 @@ def unistr(text):
     :type text: bytes or unicode or string
     :rtype: str
     """
-    if int(python_version_tuple()[0]) < 3:
+    if PYTHON_VERSION < 3:
         if isinstance(text, bytes):
             return text.decode(encoding='utf_8', errors='strict')
         elif isinstance(text, unicode):
@@ -66,7 +70,7 @@ def pystr(text):
     :type text: bytes or unicode or str
     :rtype: str
     """
-    if int(python_version_tuple()[0]) < 3:
+    if PYTHON_VERSION < 3:
         if isinstance(text, bytes):
             return text
         elif isinstance(text, unicode):
@@ -90,7 +94,7 @@ def unicode_str():
 
     :rtype: cls
     """
-    if int(python_version_tuple()[0]) < 3:
+    if PYTHON_VERSION < 3:
         return unicode
     else:
         return str
@@ -99,13 +103,14 @@ def unicode_str():
 def json_loads_utf8(json_string):
     """
     反序列化json字符串，用UTF-8编码
-    :param json_string: str
+    :param json_string: json字符串
     :return: json对象（字典或列表）
 
-    :type json_string: str
+    :type json_string: unicode or str
     :rtype: dict or list
     """
-    if not isinstance(json_string, str):
-        raise TypeError('the value does not match type: str')
+    if isinstance(json_string, str) or isinstance(json_string, unicode_str()):
+        return json.loads(json_string, encoding='utf_8')
+    else:
+        raise TypeError('the value does not match type: str or unicode')
 
-    return json.loads(json_string, encoding='utf_8')

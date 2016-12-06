@@ -36,17 +36,17 @@ class AppClient(object):
         :param address: 有度服务器地址（IP:PORT）
 
         :type buin: int
-        :type app_id: str
-        :type aes_key: str
-        :type address: str
+        :type app_id: unicode or str
+        :type aes_key: unicode or str
+        :type address: unicode or str
         """
         check_type(buin, int)
-        check_type(app_id, str)
-        check_type(aes_key, str)
-        check_type(address, str)
+        check_types(app_id, unicode_str(), str)
+        check_types(aes_key, unicode_str(), str)
+        check_types(address, unicode_str(), str)
         self.__buin = buin
-        self.__app_id = app_id
-        self.__address = address
+        self.__app_id = pystr(app_id)
+        self.__address = pystr(address)
         self.__crypto = AESCrypto(app_id, aes_key)
         self.__token_info = None
 
@@ -113,16 +113,16 @@ class AppClient(object):
         :except FileIOError: 读文件错误
 
         :type file_type: str
-        :type file_name: str
-        :type file_path: str
+        :type file_name: unicode or str
+        :type file_path: unicode or str
         :rtype: str
         """
         check_type(file_type, str)
-        check_type(file_name, str)
-        check_type(file_path, str)
+        check_types(file_name, unicode_str(), str)
+        check_types(file_path, unicode_str(), str)
         self.__check_and_refresh_token()
         url = _url_with_token(self.__address, API_UPLOAD_FILE, self.__token_info[0])
-        return _upload_file(url, self.__crypto, file_type, file_name, file_path)
+        return _upload_file(url, self.__crypto, file_type, pystr(file_name), pystr(file_path))
 
     def download_file(self, media_id, out_dir):
         """
@@ -135,15 +135,15 @@ class AppClient(object):
         :except HttpRequestError: http请求错误
         :except FileIOError: 写文件错误
 
-        :type media_id: str
-        :type out_dir: str
+        :type media_id: unicode or str
+        :type out_dir: unicode or str
         :rtype: (str, int, bytes)
         """
-        check_type(media_id, str)
-        check_type(out_dir, str)
+        check_types(media_id, unicode_str(), str)
+        check_types(out_dir, unicode_str(), str)
         self.__check_and_refresh_token()
         url = _url_with_token(self.__address, API_DOWNLOAD_FILE, self.__token_info[0])
-        return _download_file(self.__buin, url, self.__crypto, media_id, out_dir)
+        return _download_file(self.__buin, url, self.__crypto, pystr(media_id), pystr(out_dir))
 
 
 def _url_with_token(address, uri, token):
@@ -223,24 +223,24 @@ def _get_token(buin, app_id, url, crypto_obj):
         _parse_status(rsp)
         json_result = rsp.json()
         _parse_err(json_result)
-    except requests.ConnectionError as e:
+    except requests.RequestException as e:
         raise HttpRequestError(0, 'connect failed', e)
-    except json.JSONDecodeError as e:
+    except ValueError as e:
         raise ParamParserError('failed to decode json', e)
 
     encrypt_string = json_result.get('encrypt')
-    if not isinstance(encrypt_string, str):
+    if not is_instance(encrypt_string, unicode_str(), str):
         raise ParamParserError('encrypt content not exists')
 
     try:
         token_info = json_loads_utf8(pystr(crypto_obj.decrypt(encrypt_string)))
         token = token_info.get('accessToken')
         expire_in = token_info.get('expireIn')
-        if not isinstance(token, str) and not isinstance(expire_in, int):
+        if not is_instance(token, unicode_str(), str) and not isinstance(expire_in, int):
             raise ParamParserError('accessToken or expireIn not exists')
 
-        return token, expire_in
-    except json.JSONDecodeError as e:
+        return pystr(token), expire_in
+    except ValueError as e:
         raise ParamParserError('parse json failed ', e)
 
 
@@ -268,9 +268,9 @@ def _send_msg(buin, app_id, url, crypto_obj, msg):
         rsp = requests.post(url, json=param)
         _parse_status(rsp)
         _parse_err(rsp.json())
-    except requests.ConnectionError as e:
+    except requests.RequestException as e:
         raise HttpRequestError(0, 'connect failed', e)
-    except json.JSONDecodeError as e:
+    except ValueError as e:
         raise ParamParserError('failed to decode json', e)
 
 
@@ -298,8 +298,8 @@ def _upload_file(url, crypto_obj, file_type, file_name, file_path):
     cipher_request = crypto_obj.encrypt(bytestr(json.dumps({'type': file_type, 'name': file_name})))
     encrypt_file = ''
     try:
-        with open(file_path, 'rb') as file:
-            encrypt_file = crypto_obj.encrypt(file.read())
+        with open(file_path, 'rb') as f:
+            encrypt_file = crypto_obj.encrypt(f.read())
     except IOError as e:
         raise FileIOError('failed to read from file {path}'.format(path=file_path), e)
 
@@ -314,13 +314,13 @@ def _upload_file(url, crypto_obj, file_type, file_name, file_path):
         json_result = rsp.json()
         _parse_err(json_result)
         cipher_id = json_result.get('encrypt')
-        if not isinstance(cipher_id, str):
+        if not is_instance(cipher_id, unicode_str(), str):
             raise ParamParserError('encrypt content not exists')
 
-        return json_loads_utf8(pystr(crypto_obj.decrypt(cipher_id))).get('mediaId', '')
-    except requests.ConnectionError as e:
+        return pystr(json_loads_utf8(pystr(crypto_obj.decrypt(cipher_id))).get('mediaId', ''))
+    except requests.RequestException as e:
         raise HttpRequestError(0, 'connect failed', e)
-    except json.JSONDecodeError as e:
+    except ValueError as e:
         raise ParamParserError('failed to decode json', e)
 
 
@@ -353,28 +353,31 @@ def _download_file(buin, url, crypto_obj, media_id, out_dir):
         json_result = None
         try:
             json_result = rsp.json()
-        except json.JSONDecodeError:
+        except ValueError:
             pass  # 成功的时候不存在JSON数据
         if json_result is None:
             json_result = {'errcode': 0, 'errmsg': ''}
         _parse_err(json_result)
         cipher_info = rsp.headers.get('encrypt')
-        if not isinstance(cipher_info, str):
+        if not is_instance(cipher_info, unicode_str(), str):
             raise ParamParserError('encrypt content not exists')
 
         file_info = json_loads_utf8(pystr(crypto_obj.decrypt(cipher_info)))
         file_name = file_info.get('name')
         file_size = file_info.get('size')
+        if not is_instance(file_name, unicode_str(), str) and isinstance(file_size, int):
+            raise ParamParserError('name or size not exists')
+
         file_content = bytestr('')
-        with open(abspath(join(out_dir, file_name)), 'wb') as file:
+        with open(abspath(join(out_dir, pystr(file_name))), 'wb') as f:
             file_content = crypto_obj.decrypt(pystr(rsp.content))
-            file.write(file_content)
+            f.write(file_content)
 
-        return file_name, file_size, file_content
+        return pystr(file_name), file_size, file_content
 
-    except requests.ConnectionError as e:
+    except requests.RequestException as e:
         raise HttpRequestError(0, 'connect failed', e)
-    except json.JSONDecodeError as e:
+    except ValueError as e:
         raise ParamParserError('failed to decode json', e)
     except IOError as e:
         raise FileIOError('failed to save file to {path}'.format(path=out_dir), e)
