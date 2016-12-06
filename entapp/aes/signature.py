@@ -9,13 +9,13 @@ import hashlib
 from entapp.utils import *
 
 
-def get_sha1(token, timestamp, nonce, encrypt):
+def generate_signature(token, timestamp, nonce, encrypt):
 
     """
     从SHA1算法生成安全签名
     :param token: 企业应用回调token
     :param timestamp: 回调时间戳（从URL参数取）
-    :param nonce: 回调时间戳（从URL参数取）
+    :param nonce: 回调随机字符串（从URL参数取）
     :param encrypt: 回调json数据的密文字段
     :return: 安全签名
 

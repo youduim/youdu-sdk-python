@@ -12,7 +12,7 @@ from urllib.parse import parse_qsl
 import entapp.client as app
 from entapp.message import *
 from entapp.aes import AESCrypto
-from entapp.aes import get_sha1
+from entapp.aes import generate_signature
 from entapp.utils import pystr, json_loads_utf8
 
 
@@ -68,7 +68,7 @@ async def receive_msg(req):
         print('encrypt content is invalid')
         return
 
-    my_signature = get_sha1(TOKEN, timestamp, nonce, encrypt)
+    my_signature = generate_signature(TOKEN, timestamp, nonce, encrypt)
     if signature != my_signature:
         print('signature not match')
         return
