@@ -91,5 +91,14 @@ class AppClientTestCase(unittest.TestCase):
         media_id = client.upload_file(app.FILE_TYPE_FILE, FILE_NAME, FILE_PATH)
         client.download_file(media_id, OUT_DIR)
 
+    def test_search_file(self):
+        """
+        测试搜索文件
+        """
+        media_id = client.upload_file(app.FILE_TYPE_FILE, FILE_NAME, FILE_PATH)
+        exists = client.search_file(media_id)
+        self.assertTrue(exists)
+
+
 if __name__ == '__main__':
     unittest.main()

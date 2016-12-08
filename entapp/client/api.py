@@ -6,10 +6,12 @@
 
 SCHEME = 'http://'
 
-API_GET_TOKEN = '/v3/api/jgapp/ent.app.accesstoken.gen'
+API_GET_TOKEN = '/cgi/gettoken'
 
-API_SEND_MSG = '/v3/api/jgapp/ent.app.msg.send'
+API_SEND_MSG = '/cgi/msg/send'
 
-API_UPLOAD_FILE = '/v3/api/jgapp/ent.app.media.upload'
+API_UPLOAD_FILE = '/cgi/media/upload'
 
-API_DOWNLOAD_FILE = '/v3/api/jgapp/ent.app.media.get'
+API_DOWNLOAD_FILE = '/cgi/media/get'
+
+API_SEARCHE_FILE = '/cgi/media/search'
