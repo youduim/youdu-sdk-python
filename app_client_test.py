@@ -19,10 +19,10 @@ APP_ID = ''  # 请填写企业应用AppId
 ADDRESS = '127.0.0.1:7080'  # 请填写有度服务器地址
 
 IMAGE_NAME = ''  # 请填写测试图片名称
-IMAGE_PATH = ''  # 请填写测试图片地址
+IMAGE_PATH = ''  # 请填写测试图片路径
 
 FILE_NAME = ''  # 请填写测试文件名称
-FILE_PATH = ''  # 请填写测试文件地址
+FILE_PATH = ''  # 请填写测试文件路径
 
 OUT_DIR = ''  # 请填写测试下载输出目录
 
