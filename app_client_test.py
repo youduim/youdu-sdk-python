@@ -96,8 +96,8 @@ class AppClientTestCase(unittest.TestCase):
         测试搜索文件
         """
         media_id = client.upload_file(app.FILE_TYPE_FILE, FILE_NAME, FILE_PATH)
-        exists = client.search_file(media_id)
-        self.assertTrue(exists)
+        name, size = client.search_file(media_id)
+        print('name: {name}, size: {size}\n'.format(name=name, size=size))
 
 
 if __name__ == '__main__':

@@ -122,7 +122,7 @@ class AppClient(object):
         check_types(file_path, unicode_str(), str)
         self.__check_and_refresh_token()
         url = _url_with_token(self.__address, API_UPLOAD_FILE, self.__token_info[0])
-        return _upload_file(self.__buin, url, self.__crypto, file_type, pystr(file_name), pystr(file_path))
+        return _upload_file(self.__buin, self.__app_id, url, self.__crypto, file_type, pystr(file_name), pystr(file_path))
 
     def download_file(self, media_id, out_dir):
         """
@@ -143,24 +143,24 @@ class AppClient(object):
         check_types(out_dir, unicode_str(), str)
         self.__check_and_refresh_token()
         url = _url_with_token(self.__address, API_DOWNLOAD_FILE, self.__token_info[0])
-        return _download_file(self.__buin, url, self.__crypto, pystr(media_id), pystr(out_dir))
+        return _download_file(self.__buin, self.__app_id, url, self.__crypto, pystr(media_id), pystr(out_dir))
 
     def search_file(self, media_id):
         """
-        搜索文件，判断是否存在
+        搜索文件信息
         :param media_id: 资源Id
-        :return: 是否存在
+        :return: (文件名, 字节数大小)
         :except AESCryptoError: 加密失败
         :except ParamParserError: 参数解析错误
         :except HttpRequestError: http请求错误
 
         :type media_id: unicode or str
-        :rtype: bool
+        :rtype: (str, int)
         """
         check_types(media_id, unicode_str(), str)
         self.__check_and_refresh_token()
         url = _url_with_token(self.__address, API_SEARCHE_FILE, self.__token_info[0])
-        return _search_file(self.__buin, url, self.__crypto, pystr(media_id))
+        return _search_file(self.__buin, self.__app_id, url, self.__crypto, pystr(media_id))
 
 
 def _url_with_token(address, uri, token):
@@ -291,10 +291,11 @@ def _send_msg(buin, app_id, url, crypto_obj, msg):
         raise ParamParserError('failed to decode json', e)
 
 
-def _upload_file(buin, url, crypto_obj, file_type, file_name, file_path):
+def _upload_file(buin, app_id, url, crypto_obj, file_type, file_name, file_path):
     """
     上传文件
     :param buin: 企业总机号
+    :param app_id: AppId
     :param url: 带token的请求URL
     :param crypto_obj: 加密对象
     :param file_type: 文件类型
@@ -307,6 +308,7 @@ def _upload_file(buin, url, crypto_obj, file_type, file_name, file_path):
     :except FileIOError: 读文件错误
 
     :type buin: int
+    :type app_id: str
     :type url: str
     :type crypto_obj: AESCrypto
     :type file_type: str
@@ -324,6 +326,7 @@ def _upload_file(buin, url, crypto_obj, file_type, file_name, file_path):
 
     encoder = MultipartEncoder(
         fields={'buin': str(buin),
+                'appId': app_id,
                 'encrypt': cipher_request,
                 'file': ('file', encrypt_file, 'text/plain')}
     )
@@ -348,10 +351,11 @@ def _upload_file(buin, url, crypto_obj, file_type, file_name, file_path):
         raise ParamParserError('failed to decode json', e)
 
 
-def _download_file(buin, url, crypto_obj, media_id, out_dir):
+def _download_file(buin, app_id, url, crypto_obj, media_id, out_dir):
     """
     下载文件
     :param buin: 企业总机号
+    :param app_id: AppId
     :param url: 带token的请求URL
     :param crypto_obj: 加密对象
     :param media_id: 资源Id
@@ -363,6 +367,7 @@ def _download_file(buin, url, crypto_obj, media_id, out_dir):
     :except FileIOError: 写文件错误
 
     :type buin: int
+    :type app_id: str
     :type url: str
     :type crypto_obj: AESCrypto
     :type media_id: str
@@ -370,7 +375,7 @@ def _download_file(buin, url, crypto_obj, media_id, out_dir):
     :rtype: (str, int, bytes)
     """
     cipher_id = crypto_obj.encrypt(bytestr(json.dumps({'mediaId': media_id})))
-    param = {'buin': buin, 'encrypt': cipher_id}
+    param = {'buin': buin, 'appId': app_id, 'encrypt': cipher_id}
     try:
         rsp = requests.post(url, json=param)
         _parse_status(rsp)
@@ -407,26 +412,28 @@ def _download_file(buin, url, crypto_obj, media_id, out_dir):
         raise FileIOError('failed to save file to {path}'.format(path=out_dir), e)
 
 
-def _search_file(buin, url, crypto_obj, media_id):
+def _search_file(buin, app_id, url, crypto_obj, media_id):
     """
-    搜索文件，判断是否存在
+    搜索文件信息
     :param buin: 企业总机号
+    :param app_id: AppId
     :param url: 带token的请求URL
     :param crypto_obj: 加密对象
     :param media_id: 资源Id
-    :return: 是否存在
+    :return: (文件名, 字节数大小)
     :except AESCryptoError: 加密失败
     :except ParamParserError: 参数解析错误
     :except HttpRequestError: http请求错误
 
     :type buin: int
+    :type app_id: str
     :type url: str
     :type crypto_obj: AESCrypto
     :type media_id: str
-    :rtype: bool
+    :rtype: (str, int)
     """
     cipher_id = crypto_obj.encrypt(bytestr(json.dumps({'mediaId': media_id})))
-    param = {'buin': buin, 'encrypt': cipher_id}
+    param = {'buin': buin, 'appId': app_id, 'encrypt': cipher_id}
     try:
         rsp = requests.post(url, json=param)
         _parse_status(rsp)
@@ -436,11 +443,13 @@ def _search_file(buin, url, crypto_obj, media_id):
         if not is_instance(encrypt_result, unicode_str(), str):
             raise ParamParserError('encrypt content not exists')
 
-        exists = json_loads_utf8(pystr(crypto_obj.decrypt(encrypt_result))).get('exist', False)
-        if not isinstance(exists, bool):
-            raise ParamParserError('result invalid')
+        file_info = json_loads_utf8(pystr(crypto_obj.decrypt(encrypt_result)))
+        name = file_info.get('name', '')
+        size = file_info.get('size', 0)
+        if name == '' or size <= 0:
+            raise ParamParserError('file info is not valid')
 
-        return exists
+        return name, size
     except requests.RequestException as e:
         raise HttpRequestError(0, 'connect failed', e)
     except ValueError as e:
